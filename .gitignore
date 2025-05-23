@@ -1,0 +1,27 @@
+# System
+.DS_Store
+
+# Laravel
+/vendor
+/node_modules
+#.env
+#.env.*
+.phpunit.result.cache
+
+# Laravel storage & bootstrap cache
+/storage/app/*
+/storage/framework/*
+/storage/logs/*
+/bootstrap/cache/*.php
+
+# Оставляем .gitignore файлы внутри нужных папок
+!storage/app/.gitignore
+!storage/framework/.gitignore
+!storage/logs/.gitignore
+!bootstrap/cache/.gitignore
+
+# Laravel public symlinks
+/public/storage
+
+# MySQL data 
+#mysql-data/

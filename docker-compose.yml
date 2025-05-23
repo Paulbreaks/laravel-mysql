@@ -1,0 +1,68 @@
+services:
+  app:
+    build:
+      context: .
+    container_name: laravel-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - "8080:80"
+      - "6001:6001" # WebSockets
+    env_file:
+      - .env        
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: ${TZ}
+    depends_on:
+      - db
+    command: >
+      sh -c "composer install && php artisan migrate --force || true && php artisan cache:clear && php artisan config:clear && php artisan config:cache && php artisan queue:restart && apache2-foreground"
+    networks:
+      - laravel 
+
+  db:
+    image: mysql:8.0
+    container_name: laravel-mysql
+    restart: unless-stopped
+    env_file:
+      - .env      
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3308:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    networks:
+      - laravel   
+
+  phpmyadmin:
+    build:                                # Удалить на проде
+      context: .                          # Удалить на проде
+      dockerfile: Dockerfile.phpmyadmin   # Удалить на проде  
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-laravel
+    restart: unless-stopped
+    env_file:
+      - .env     
+    environment:
+      TZ: ${TZ}    
+      PMA_HOST: db
+    ports:
+      - "8083:80"
+    depends_on:
+      - db
+    networks:
+      - laravel   
+
+networks:
+  laravel:
+    driver: bridge        
+
